@@ -11,6 +11,7 @@ export interface CartItem {
   image?: string
   stock: number
   weight: number
+  isDigital?: boolean
 }
 
 interface CartState {

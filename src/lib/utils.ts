@@ -13,6 +13,9 @@ export function formatRupiah(amount: number): string {
   }).format(amount)
 }
 
+export const formatPrice = formatRupiah
+export const formatCurrency = formatRupiah
+
 export function formatDate(date: Date | string | null): string {
   if (!date) return '-'
   const d = typeof date === 'string' ? new Date(date) : date

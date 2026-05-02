@@ -1,88 +1,86 @@
 'use client'
+import { useState, useEffect } from 'react'
 import { ProductCard } from '@/components/product/ProductCard'
 import Link from 'next/link'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, Flame, Package } from 'lucide-react'
 
-const sampleProducts = [
-  {
-    id: 1,
-    name: 'Paket 50 Bibit Sayuran Varian Tanaman Lengkap - Benih Seribuan',
-    slug: 'paket-50-bibit-sayuran',
-    price: 150000,
-    salePrice: 100000,
-    image: '/images/hero-product.png',
-    soldCount: 500,
-    rating: 4.9,
-    stock: 100,
-    weight: 500,
-  },
-  {
-    id: 2,
-    name: 'Pupuk Organik Cair POC Tanaman Cabai & Sayuran Daun 500ml',
-    slug: 'pupuk-organik-cair-500ml',
-    price: 50000,
-    salePrice: 35000,
-    image: '/images/hero-bg.png', // Temporary placeholder
-    soldCount: 1200,
-    rating: 4.8,
-    stock: 50,
-    weight: 600,
-  },
-  {
-    id: 3,
-    name: 'Benih Cabai Rawit Unggul - Isi 50 Biji Benih Seribuan',
-    slug: 'benih-cabai-rawit',
-    price: 5000,
-    salePrice: 1000,
-    image: '/images/hero-product.png',
-    soldCount: 3400,
-    rating: 5.0,
-    stock: 1000,
-    weight: 10,
-  },
-  {
-    id: 4,
-    name: 'Media Tanam Siap Pakai Premium Campuran Sekam Bakar & Kompos',
-    slug: 'media-tanam-premium',
-    price: 25000,
-    image: '/images/hero-bg.png',
-    soldCount: 800,
-    rating: 4.7,
-    stock: 200,
-    weight: 5000,
-  }
-]
+import FloatingSeeds from './FloatingSeeds'
 
 export function FeaturedProducts() {
+  const [products, setProducts] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetch('/api/admin/products')
+      .then(res => res.json())
+      .then(data => {
+        const raw = Array.isArray(data) ? data : []
+        // Filter featured products, or just take latest 4 if none are featured
+        let featured = raw.filter((p: any) => p.isFeatured)
+        if (featured.length === 0) featured = raw.slice(0, 4)
+        else featured = featured.slice(0, 4)
+
+        const mapped = featured.map((p: any) => ({
+            id: p.id,
+            name: p.name,
+            slug: p.slug,
+            price: Number(p.price),
+            image: p.images?.[0]?.url || '/images/hero-product.png',
+            stock: p.stock,
+            weight: p.weight || 10,
+            category: p.category?.name,
+            rating: 4.9,
+            soldCount: Math.floor(Math.random() * 500) + 200,
+          }))
+        setProducts(mapped)
+        setLoading(false)
+      })
+  }, [])
+
   return (
-    <section className="bg-gray-50 dark:bg-[#0c1210] py-24">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
-          <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-400 text-xs font-bold mb-4">
-              🔥 PRODUK PILIHAN
+    <section className="py-24 relative overflow-hidden">
+      <FloatingSeeds />
+      <div className="container-custom relative z-10">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
+          <div className="max-w-2xl">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-brand-50 dark:bg-brand-500/10 text-brand-700 dark:text-brand-400 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest mb-6">
+              <Flame className="w-4 h-4 text-orange-500 animate-pulse" />
+              Produk Terlaris Minggu Ini
             </div>
-            <h2 className="text-3xl lg:text-4xl font-black text-gray-900 dark:text-white mb-4 font-heading">
-              Benih <span className="text-gradient-brand">Terlaris</span> Pekan Ini
+            <h2 className="text-3xl lg:text-5xl font-black text-slate-900 dark:text-white mb-6 font-heading tracking-tight">
+              Koleksi Benih <span className="text-brand-600">Paling Dicari</span>
             </h2>
-            <p className="text-gray-600 dark:text-gray-400">
-              Produk-produk pilihan yang paling banyak dicari oleh komunitas Benih Seribuan.
+            <p className="text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
+              Temukan varian benih favorit komunitas yang terbukti memiliki daya tumbuh tinggi dan hasil panen melimpah.
             </p>
           </div>
           <Link 
             href="/toko" 
-            className="group flex items-center gap-2 font-bold text-brand-700 dark:text-brand-400 hover:text-brand-800 dark:hover:text-brand-300 transition-colors"
+            className="group w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 bg-white border border-slate-100 rounded-2xl font-black text-slate-900 hover:bg-slate-50 hover:border-slate-200 transition-all duration-300 shadow-sm"
           >
-            Lihat Semua Produk
-            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            Lihat Semua
+            <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-          {sampleProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+        {loading ? (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="aspect-[4/5] bg-slate-50 rounded-[32px] animate-pulse" />
+            ))}
+          </div>
+        ) : products.length === 0 ? (
+          <div className="py-12 text-center bg-slate-50 rounded-[32px] border border-dashed border-slate-200">
+             <Package className="w-12 h-12 text-slate-200 mx-auto mb-4" />
+             <p className="text-slate-400 font-bold">Belum ada produk unggulan.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8">
+            {products.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   )

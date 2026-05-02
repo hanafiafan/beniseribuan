@@ -237,6 +237,32 @@ CREATE TABLE `vouchers` (
   UNIQUE KEY `vouchers_code_idx` (`code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ─── FLASH SALES ─────────────────────────────────────────
+CREATE TABLE `flash_sales` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(255) NOT NULL,
+  `slug` VARCHAR(255) NOT NULL,
+  `description` TEXT DEFAULT NULL,
+  `image` VARCHAR(500) DEFAULT NULL,
+  `start_date` TIMESTAMP NOT NULL,
+  `end_date` TIMESTAMP NOT NULL,
+  `is_active` TINYINT(1) DEFAULT 1,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE `flash_sale_products` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `flash_sale_id` BIGINT UNSIGNED NOT NULL,
+  `product_id` BIGINT UNSIGNED NOT NULL,
+  `flash_price` DECIMAL(12,2) NOT NULL,
+  `stock` INT NOT NULL,
+  `sold_count` INT DEFAULT 0,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `fk_flash_sale` FOREIGN KEY (`flash_sale_id`) REFERENCES `flash_sales` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_flash_product` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- ─── BANNERS ────────────────────────────────────────────
 CREATE TABLE `banners` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -425,6 +451,35 @@ CREATE TABLE `notifications` (
   PRIMARY KEY (`id`),
   KEY `notifications_user_idx` (`user_id`),
   CONSTRAINT `fk_notifications_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ─── CARTS ───────────────────────────────────────────────
+CREATE TABLE `carts` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_id` BIGINT UNSIGNED DEFAULT NULL,
+  `session_id` VARCHAR(255) DEFAULT NULL,
+  `is_recovered` TINYINT(1) DEFAULT 0,
+  `last_reminder_sent_at` TIMESTAMP NULL DEFAULT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `carts_user_id_idx` (`user_id`),
+  CONSTRAINT `fk_carts_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ─── CART ITEMS ──────────────────────────────────────────
+CREATE TABLE `cart_items` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `cart_id` BIGINT UNSIGNED NOT NULL,
+  `product_id` BIGINT UNSIGNED NOT NULL,
+  `variant_id` BIGINT UNSIGNED DEFAULT NULL,
+  `quantity` INT NOT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `cart_items_cart_id_idx` (`cart_id`),
+  KEY `cart_items_product_id_idx` (`product_id`),
+  CONSTRAINT `fk_cart_items_cart` FOREIGN KEY (`cart_id`) REFERENCES `carts` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_cart_items_product` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ─── MEDIA ──────────────────────────────────────────────

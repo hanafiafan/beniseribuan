@@ -1,7 +1,6 @@
 'use client'
-import Image from 'next/image'
 import Link from 'next/link'
-import { Heart, ShoppingCart, Star, MapPin } from 'lucide-react'
+import { Heart, ShoppingCart, Star, MapPin, Eye, Plus } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { cn, formatRupiah } from '@/lib/utils'
 import { useCartStore } from '@/stores/cartStore'
@@ -37,99 +36,121 @@ export function ProductCard({ product }: ProductCardProps) {
 
   return (
     <motion.div
-      whileHover={{ y: -5 }}
-      className="group relative bg-white dark:bg-gray-800 rounded-[24px] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300"
+      initial={{ opacity: 0, scale: 0.95 }}
+      whileInView={{ opacity: 1, scale: 1 }}
+      viewport={{ once: true }}
+      className="group relative glass-card rounded-[32px] overflow-hidden"
     >
-      {/* Product Image */}
-      <Link href={`/produk/${product.slug}`} className="block relative aspect-square overflow-hidden bg-gray-50 dark:bg-gray-900">
-        <Image
-          src={product.image}
+      {/* Product Image Wrapper */}
+      <div className="relative aspect-[4/5] overflow-hidden bg-slate-50">
+        <img
+          src={product.image} // Using product image
           alt={product.name}
-          fill
-          className="object-cover group-hover:scale-110 transition-transform duration-500"
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+          onError={(e: any) => {
+            e.target.src = 'https://images.unsplash.com/photo-1592841208389-52317a7027e4?auto=format&fit=crop&q=80&w=600'
+          }}
         />
         
-        {/* Badges */}
-        <div className="absolute top-3 left-3 flex flex-col gap-2">
+        {/* Badges Overlay */}
+        <div className="absolute top-4 left-4 flex flex-col gap-2 z-10">
           {discount > 0 && (
-            <span className="px-2 py-1 bg-red-500 text-white text-[10px] font-bold rounded-lg shadow-lg">
+            <span className="px-3 py-1 bg-red-500 text-white text-[10px] font-black rounded-full shadow-lg shadow-red-500/30 uppercase tracking-widest">
               -{discount}%
             </span>
           )}
           {product.soldCount && product.soldCount > 100 && (
-             <span className="px-2 py-1 bg-brand-600 text-white text-[10px] font-bold rounded-lg shadow-lg">
-               Terlaris
+             <span className="px-3 py-1 bg-brand-600 text-white text-[10px] font-black rounded-full shadow-lg shadow-brand-500/30 uppercase tracking-widest">
+               HOT ITEM
              </span>
           )}
         </div>
 
-        {/* Action Buttons Overlay */}
-        <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 pointer-events-none group-hover:pointer-events-auto">
-          <button
-            onClick={(e) => {
-              e.preventDefault()
-              toggleWishlist(product.id)
-            }}
-            className={cn(
-              "w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 shadow-xl",
-              isWishlisted 
-                ? "bg-red-500 text-white" 
-                : "bg-white text-gray-700 hover:bg-red-50 hover:text-red-500"
-            )}
-          >
-            <Heart className={cn("w-5 h-5", isWishlisted && "fill-current")} />
-          </button>
-        </div>
-      </Link>
+        {/* Wishlist Button */}
+        <button
+          onClick={(e) => {
+            e.preventDefault()
+            toggleWishlist(product.id)
+          }}
+          className={cn(
+            "absolute top-4 right-4 w-10 h-10 rounded-2xl flex items-center justify-center transition-all duration-300 z-10 shadow-lg",
+            isWishlisted 
+              ? "bg-red-500 text-white" 
+              : "bg-white/80 backdrop-blur-md text-slate-400 hover:text-red-500"
+          )}
+        >
+          <Heart className={cn("w-5 h-5", isWishlisted && "fill-current")} />
+        </button>
 
-      {/* Content */}
-      <div className="p-4">
-        <Link href={`/produk/${product.slug}`} className="block mb-2">
-          <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100 line-clamp-2 min-h-[40px] leading-tight group-hover:text-brand-700 dark:group-hover:text-brand-400 transition-colors">
+        {/* View Detail Overlay */}
+        <div className="absolute inset-0 bg-brand-900/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+           <Link 
+             href={`/produk/${product.slug}`}
+             className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-brand-600 shadow-xl scale-90 group-hover:scale-100 transition-all pointer-events-auto"
+           >
+             <Eye className="w-6 h-6" />
+           </Link>
+        </div>
+      </div>
+
+      {/* Product Content */}
+      <div className="p-4 sm:p-5">
+        <div className="flex items-center gap-2 mb-3">
+          <div className="flex items-center text-amber-500">
+            <Star className="w-3.5 h-3.5 fill-current" />
+            <span className="ml-1 text-[11px] font-black text-slate-800 dark:text-slate-200">{product.rating || 5.0}</span>
+          </div>
+          <span className="text-[10px] text-slate-200 dark:text-slate-700 font-bold">|</span>
+          <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">Terjual {product.soldCount || 0}+</span>
+        </div>
+
+        <Link href={`/produk/${product.slug}`} className="block mb-4">
+          <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white line-clamp-2 min-h-[40px] leading-tight group-hover:text-brand-600 transition-colors font-heading">
             {product.name}
           </h3>
         </Link>
 
-        <div className="flex items-center gap-2 mb-2">
-          <span className="text-lg font-black text-brand-700 dark:text-brand-400">
-            {formatRupiah(displayPrice)}
-          </span>
-          {product.salePrice && (
-            <span className="text-xs text-gray-400 line-through">
-              {formatRupiah(product.price)}
-            </span>
-          )}
-        </div>
-
-        <div className="flex items-center gap-1 mb-3 text-[11px] text-gray-500 dark:text-gray-400">
-          <div className="flex items-center text-yellow-400">
-            <Star className="w-3 h-3 fill-current" />
-            <span className="ml-0.5 font-bold text-gray-700 dark:text-gray-300">{product.rating || 4.8}</span>
+        <div className="flex items-end justify-between gap-2">
+          <div>
+            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Mulai Dari</p>
+            <div className="flex flex-col">
+              <span className="text-lg sm:text-xl font-black text-brand-600 font-heading">
+                {formatRupiah(displayPrice)}
+              </span>
+              {product.salePrice && (
+                <span className="text-[10px] text-slate-300 dark:text-slate-600 line-through font-bold">
+                  {formatRupiah(product.price)}
+                </span>
+              )}
+            </div>
           </div>
-          <span className="text-gray-300">|</span>
-          <span>Terjual {product.soldCount || 0}+</span>
+
+          <button 
+            onClick={() => addItem({
+              productId: product.id,
+              name: product.name,
+              price: displayPrice,
+              image: product.image,
+              quantity: 1,
+              stock: product.stock || 100,
+              weight: product.weight || 10
+            })}
+            className="w-10 h-10 sm:w-12 sm:h-12 bg-brand-600 text-white rounded-2xl flex items-center justify-center hover:scale-110 hover:bg-brand-700 transition-all shadow-xl shadow-brand-500/20 group/btn"
+          >
+            <Plus className="w-5 h-5 sm:w-6 sm:h-6 transition-transform group-hover/btn:rotate-90" />
+          </button>
         </div>
 
-        <div className="flex items-center gap-1 text-[11px] text-gray-400 mb-4">
-          <MapPin className="w-3 h-3" />
-          <span>{product.location || 'Boyolali'}</span>
+        {/* Footer Info */}
+        <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+          <div className="flex items-center gap-1.5 text-[9px] font-black text-slate-400 uppercase tracking-widest">
+            <MapPin className="w-3 h-3 text-brand-500" />
+            <span className="dark:text-slate-500">{product.location || 'Boyolali'}</span>
+          </div>
+          <Link href={`/produk/${product.slug}`} className="text-[9px] font-black text-brand-600 uppercase tracking-widest hover:underline">
+            Detail
+          </Link>
         </div>
-
-        <button
-          onClick={() => addItem({
-            productId: product.id,
-            name: product.name,
-            price: displayPrice,
-            image: product.image,
-            quantity: 1,
-            stock: product.stock,
-            weight: product.weight
-          })}
-          className="w-full py-2.5 rounded-xl border-2 border-brand-700 dark:border-brand-600 text-brand-700 dark:text-brand-400 font-bold text-xs flex items-center justify-center gap-2 hover:bg-brand-700 hover:text-white dark:hover:bg-brand-600 transition-all duration-300"
-        >
-          <ShoppingCart className="w-4 h-4" />
-          Tambah Keranjang
-        </button>
       </div>
     </motion.div>
   )

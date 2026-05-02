@@ -1,17 +1,13 @@
-import { drizzle } from 'drizzle-orm/mysql2'
-import mysql from 'mysql2/promise'
+import { drizzle } from 'drizzle-orm/postgres-js'
+import postgres from 'postgres'
 import * as schema from './schema'
 
-const pool = mysql.createPool({
-  host: process.env.DATABASE_HOST || 'localhost',
-  port: Number(process.env.DATABASE_PORT) || 3306,
-  user: process.env.DATABASE_USER || 'root',
-  password: process.env.DATABASE_PASSWORD || '',
-  database: process.env.DATABASE_NAME || 'benihseribuan_v2',
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
-})
+const connectionString = process.env.DATABASE_URL || 'postgres://postgres:postgres@localhost:5432/benihseribuan'
 
-export const db = drizzle(pool, { schema, mode: 'default' })
-export { pool }
+// Disable prefetch as it is not supported for "Transaction" mode in connection pooling
+// But for local development, it's fine.
+const client = postgres(connectionString)
+
+export const db = drizzle(client, { schema })
+
+console.log('🟢 DATABASE: PostgreSQL connection initialized.')

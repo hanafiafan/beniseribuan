@@ -13,7 +13,7 @@ interface AuthShellProps {
 
 export function AuthShell({ children, title, subtitle, image }: AuthShellProps) {
   return (
-    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-white dark:bg-[#0a0f0d]">
+    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-white">
       {/* Brand Side */}
       <div className="hidden lg:block relative overflow-hidden bg-brand-900 p-20">
         <div className="absolute inset-0 opacity-20">
